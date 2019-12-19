@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Nodejs</title>
+  </head>
+  <body>
+    <div>
+      <h2>1st Method:</h2>
+      <span id="var1"></span>
+    </div>
+    <div>
+      <h2>2nd Method:</h2>
+      <span id="var2"></span>
+    </div>
+    <div style="margin-top: 1em;">
+      <button onclick="test(start_url + root_url)">1st Method</button>
+      <button onclick="test2(start_url + root_url)">2nd Method</button>
+    </div>
+    <script>
+      var first = document.querySelector("#var1");
+      var second = document.querySelector("#var2");
+      let start_url = "https://fe.it-academy.by/Examples/words_tree/";
+      let root_url = "root.txt";
+      let test = async url => {
+        try {
+          var response = await fetch(url);
+          if (response.ok) {
+            var result = await response.text();
+            try {
+              JSON.parse(result);
+              let arr = JSON.parse(result);
+              for (let i = 0; i < arr.length; i++) {
+                await test(start_url + arr[i]);
+              }
+            } catch (error) {
+              first.innerHTML += result + " ";
+            }
+          }
+        } catch (e) {}
+      };
+
+      function test2(url, resolve) {
+        var response = fetch(url).then(
+          function(response) {
+            response.text().then(function(items) {
+              var result2 = items;
+              try {
+                var arr = JSON.parse(items);
+                for (let i = 0, p = Promise.resolve(); i < arr.length; i++) {
+                  p = p.then(function(_) {
+                    return new Promise(function(resolve) {
+                      test2(start_url + arr[i], resolve);
+                    });
+                  });
+                  if (i == arr.length - 1) {
+                    p.then(function(res) {
+                      resolve();
+                    });
+                  }
+                }
+              } catch (error) {
+                if (resolve) {
+                  resolve();
+                }
+                second.innerHTML += result2 + " ";
+              }
+            });
+          },
+          function(error) {
+            resolve();
+            console.log(error);
+          }
+        );
+      }
+    </script>
+  </body>
+</html>
